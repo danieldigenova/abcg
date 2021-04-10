@@ -4,7 +4,7 @@ Atividade 02 da disciplina de Computação Gráfica da UFABC.
 
 O projeto consiste em uma aplicação com gráficos 3D inspirada no descanso de tela [Block Tube](https://www.youtube.com/watch?v=L0JUBhpZlMw).
 
-O descanso de tela retrata um tubo cilindrico de blocos retangulares que orbitam no raio desse tubo.
+O descanso de tela retrata um tubo cilíndrico de blocos retangulares que orbitam no raio desse tubo.
 Os blocos se movimentam em direção a câmera (movimentos em relação ao eixo z).
 Além disso, as cores dos blocos se alteram gradativamente durante o tempo.
 
