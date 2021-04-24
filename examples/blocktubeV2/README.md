@@ -1,4 +1,4 @@
-# Block Tube
+# Block Tube V2
 
 Atividade 03 da disciplina de Computação Gráfica da UFABC.
 

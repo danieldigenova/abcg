@@ -25,7 +25,7 @@ uniform sampler2D diffuseTex;
 uniform sampler2D normalTex;
 
 // Attenuation coefficients
-uniform vec3 k = {0.5f, 0.01f, 0.0015f};
+uniform vec3 k;
 
 // Mapping mode
 // 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
@@ -137,7 +137,7 @@ void main() {
   vec4 color;
 
   float D = length(fragLEye);
-  float fatt = 1/(k.x + D*k.y + D*D*k.z);
+  float fatt = 1.0/(k.x + D*k.y + D*D*k.z);
 
   if (mappingMode == 0) {
     // Triplanar mapping

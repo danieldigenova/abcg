@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     auto window{std::make_unique<OpenGLWindow>()};
     window->setOpenGLSettings({.samples = 0});
     window->setWindowSettings(
-        {.width = 700, .height = 700, .title = "Block Tube v2"});
+        {.width = 700, .height = 700, .title = "Block Tube V2"});
 
     app.run(window);
   } catch (abcg::Exception &exception) {

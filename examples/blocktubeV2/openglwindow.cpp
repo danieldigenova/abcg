@@ -58,8 +58,6 @@ void OpenGLWindow::randomizeBlock(glm::vec3 &position, glm::vec3 &rotation, floa
 }
 
 void OpenGLWindow::loadModel(std::string_view path) {
-  m_model.loadDiffuseTexture(getAssetsPath() + "maps/pattern.png");
-  m_model.loadNormalTexture(getAssetsPath() + "maps/pattern_normal.png");
   m_model.loadFromFile(path);
   m_model.setupVAO(m_program);
 
