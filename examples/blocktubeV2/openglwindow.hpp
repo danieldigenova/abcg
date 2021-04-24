@@ -36,9 +36,6 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   float radius{4.0f};
   float velocityZ{5.0f};
 
-  //float color_rate = 0.7f;
-  //int color_up_down = 1;
-
   glm::mat4 m_modelMatrix{1.0f};
   glm::mat4 m_viewMatrix{1.0f};
   glm::mat4 m_projMatrix{1.0f};
@@ -49,14 +46,13 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_mappingMode = 3;
 
   // Light and material properties
-  //glm::vec4 m_lightDir{0.0f, 0.0f, 0.0f, 0.0f};
   glm::vec4 m_Ia{1.0f};
   glm::vec4 m_Id{1.0f};
   glm::vec4 m_Is{1.0f};
   glm::vec4 m_Ka{};
   glm::vec4 m_Kd{};
   glm::vec4 m_Ks{};
-  glm::vec3 m_K = {0.5f, 0.0005f, 0.0075f};
+  glm::vec3 m_K = {0.5f, 0.01f, 0.0015f};
   float m_shininess{};
 
   void loadModel(std::string_view path);

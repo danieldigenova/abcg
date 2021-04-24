@@ -24,8 +24,8 @@ uniform sampler2D diffuseTex;
 // Normal map sampler
 uniform sampler2D normalTex;
 
-// Coeficientes
-uniform vec3 k = {1.0f, 0.045f, 0.0075f};
+// Attenuation coefficients
+uniform vec3 k = {0.5f, 0.01f, 0.0015f};
 
 // Mapping mode
 // 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
@@ -43,10 +43,7 @@ mat3 ComputeTBN(vec3 TObj, vec3 BObj, vec3 NObj) {
 }
 
 // Blinn-Phong reflection model
-vec4 BlinnPhong(vec3 N, vec3 L, vec3 V, vec2 texCoord, vec3 k) {
-
-  float D = length(L);
-  float fatt = 1/(k.x + D*k.y + D*D*k.z);
+vec4 BlinnPhong(vec3 N, vec3 L, vec3 V, vec2 texCoord, float fatt) {
 
   N = normalize(N);
   L = normalize(L);
@@ -70,7 +67,7 @@ vec4 BlinnPhong(vec3 N, vec3 L, vec3 V, vec2 texCoord, vec3 k) {
   vec4 specularColor = Ks * Is * specular;
   vec4 ambientColor = map_Ka * Ka * Ia;
 
-  return ambientColor + (diffuseColor + specularColor) * fatt;
+  return (ambientColor + diffuseColor + specularColor) * fatt;
 }
 
 // Planar mapping
@@ -139,6 +136,9 @@ mat3 SphericalTBN(vec3 P) {
 void main() {
   vec4 color;
 
+  float D = length(fragLEye);
+  float fatt = 1/(k.x + D*k.y + D*D*k.z);
+
   if (mappingMode == 0) {
     // Triplanar mapping
 
@@ -152,7 +152,7 @@ void main() {
     vec3 VTan = TBN * normalize(fragVEye);
     vec3 NTan = texture(normalTex, texCoord1).xyz;
     NTan = normalize(NTan * 2.0 - 1.0);  // From [0, 1] to [-1, 1]
-    vec4 color1 = BlinnPhong(NTan, LTan, VTan, texCoord1, k);
+    vec4 color1 = BlinnPhong(NTan, LTan, VTan, texCoord1, fatt);
 
     // Sample with y planar mapping
     vec2 texCoord2 = PlanarMappingYUV(fragPObj + offset);
@@ -161,7 +161,7 @@ void main() {
     VTan = TBN * normalize(fragVEye);
     NTan = texture(normalTex, texCoord2).xyz;
     NTan = normalize(NTan * 2.0 - 1.0);  // From [0, 1] to [-1, 1]
-    vec4 color2 = BlinnPhong(NTan, LTan, VTan, texCoord2, k);
+    vec4 color2 = BlinnPhong(NTan, LTan, VTan, texCoord2, fatt);
 
     // Sample with z planar mapping
     vec2 texCoord3 = PlanarMappingZUV(fragPObj + offset);
@@ -170,7 +170,7 @@ void main() {
     VTan = TBN * normalize(fragVEye);
     NTan = texture(normalTex, texCoord3).xyz;
     NTan = normalize(NTan * 2.0 - 1.0);  // From [0, 1] to [-1, 1]
-    vec4 color3 = BlinnPhong(NTan, LTan, VTan, texCoord3, k);
+    vec4 color3 = BlinnPhong(NTan, LTan, VTan, texCoord3, fatt);
 
     // Compute average based on normal
     vec3 weight = abs(normalize(fragNObj));
@@ -198,7 +198,7 @@ void main() {
     vec3 NTan = texture(normalTex, texCoord).xyz;
     NTan = normalize(NTan * 2.0 - 1.0);  // From [0, 1] to [-1, 1]
 
-    color = BlinnPhong(NTan, LTan, VTan, texCoord, k);
+    color = BlinnPhong(NTan, LTan, VTan, texCoord, fatt);
   }
 
   if (gl_FrontFacing) {

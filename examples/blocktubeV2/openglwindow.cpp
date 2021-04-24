@@ -13,7 +13,7 @@ void OpenGLWindow::initializeGL() {
   // Enable depth buffering
   glEnable(GL_DEPTH_TEST);
 
-  // Create programs
+  // Create program
   m_program = createProgramFromFile(getAssetsPath() + "shaders/normalmapping.vert",
                                     getAssetsPath() + "shaders/normalmapping.frag");
 
@@ -58,11 +58,10 @@ void OpenGLWindow::randomizeBlock(glm::vec3 &position, glm::vec3 &rotation, floa
 }
 
 void OpenGLWindow::loadModel(std::string_view path) {
-  m_model.loadDiffuseTexture(getAssetsPath() + "maps/brick_diffuse.jpg");
-  m_model.loadNormalTexture(getAssetsPath() + "maps/brick_normal.jpg");
+  m_model.loadDiffuseTexture(getAssetsPath() + "maps/pattern.png");
+  m_model.loadNormalTexture(getAssetsPath() + "maps/pattern_normal.png");
   m_model.loadFromFile(path);
   m_model.setupVAO(m_program);
-  //m_trianglesToDraw = m_model.getNumTriangles();
 
   // Use material properties from the loaded model
   m_Ka = m_model.getKa();
@@ -86,7 +85,6 @@ void OpenGLWindow::paintGL() {
   GLint projMatrixLoc{glGetUniformLocation(m_program, "projMatrix")};
   GLint modelMatrixLoc{glGetUniformLocation(m_program, "modelMatrix")};
   GLint normalMatrixLoc{glGetUniformLocation(m_program, "normalMatrix")};
-  //GLint lightDirLoc{glGetUniformLocation(m_program, "lightDirWorldSpace")};
   GLint shininessLoc{glGetUniformLocation(m_program, "shininess")};
   GLint IaLoc{glGetUniformLocation(m_program, "Ia")};
   GLint IdLoc{glGetUniformLocation(m_program, "Id")};
@@ -106,8 +104,6 @@ void OpenGLWindow::paintGL() {
   glUniform1i(normalTexLoc, 1);
   glUniform1i(mappingModeLoc, m_mappingMode);
 
-  //auto lightDirRotated{m_lightDir};
-  //glUniform4fv(lightDirLoc, 1, &m_lightDir.z);
   glUniform4fv(IaLoc, 1, &m_Ia.x);
   glUniform4fv(IdLoc, 1, &m_Id.x);
   glUniform4fv(IsLoc, 1, &m_Is.x);
@@ -125,8 +121,6 @@ void OpenGLWindow::paintGL() {
   glUniform4fv(KsLoc, 1, &m_Ks.x);
 
   glUniform3fv(KLoc, 1, &m_K.x);
-
-  //m_model.render(m_trianglesToDraw);
 
   // Render each block
   for (const auto index : iter::range(m_numBlocks)) {
@@ -154,7 +148,7 @@ void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
 
   {
-    auto widgetSize{ImVec2(250, 196)};
+    auto widgetSize{ImVec2(250, 116)};
     ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
     ImGui::SetNextWindowSize(widgetSize);
     ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
@@ -187,10 +181,6 @@ void OpenGLWindow::paintUI() {
         ImGui::SliderFloat("radius", &radius, 2.0f, 7.0f, "%.0f units");
         // Control of the speed value of the z component
         ImGui::SliderFloat("velocity", &velocityZ, 1.0f, 15.0f, "%.0f units");
-
-        ImGui::SliderFloat("kc", &m_K.x, -100.0f, 100.0f, "%.0f units");
-        ImGui::SliderFloat("kl", &m_K.y, -100.0f, 100.0f, "%.0f units");
-        ImGui::SliderFloat("kq", &m_K.z, -100.0f, 100.0f, "%.0f units");
       } else {
         m_projMatrix = glm::ortho(-20.0f * aspect, 20.0f * aspect, -20.0f,
                                   20.0f, 0.01f, 100.0f);
@@ -203,42 +193,7 @@ void OpenGLWindow::paintUI() {
     }
 
     ImGui::End();
-  }
-
-  // Create window for light sources
-    auto widgetSize{ImVec2(222, 244)};
-    ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5,
-                                   m_viewportHeight - widgetSize.y - 5));
-    ImGui::SetNextWindowSize(widgetSize);
-    ImGui::Begin(" ", nullptr, ImGuiWindowFlags_NoDecoration);
-
-    ImGui::Text("Light properties");
-
-    // Slider to control light properties
-    ImGui::PushItemWidth(widgetSize.x - 36);
-    ImGui::ColorEdit3("Ia", &m_Ia.x, ImGuiColorEditFlags_Float);
-    ImGui::ColorEdit3("Id", &m_Id.x, ImGuiColorEditFlags_Float);
-    ImGui::ColorEdit3("Is", &m_Is.x, ImGuiColorEditFlags_Float);
-    ImGui::PopItemWidth();
-
-    ImGui::Spacing();
-
-    ImGui::Text("Material properties");
-
-    // Slider to control material properties
-    ImGui::PushItemWidth(widgetSize.x - 36);
-    ImGui::ColorEdit3("Ka", &m_Ka.x, ImGuiColorEditFlags_Float);
-    ImGui::ColorEdit3("Kd", &m_Kd.x, ImGuiColorEditFlags_Float);
-    ImGui::ColorEdit3("Ks", &m_Ks.x, ImGuiColorEditFlags_Float);
-    ImGui::PopItemWidth();
-
-    // Slider to control the specular shininess
-    ImGui::PushItemWidth(widgetSize.x - 16);
-    ImGui::SliderFloat("", &m_shininess, 0.0f, 500.0f, "shininess: %.1f");
-    ImGui::PopItemWidth();
-
-    ImGui::End();
-  
+  }  
 }
 
 void OpenGLWindow::resizeGL(int width, int height) {
@@ -251,19 +206,6 @@ void OpenGLWindow::terminateGL() { glDeleteProgram(m_program); }
 void OpenGLWindow::update() {
 
  float deltaTime{static_cast<float>(getDeltaTime())};
-
-  // Changes the color of the block according to the color rate
-  /*if (color_rate <= 0.00f) {
-    color_up_down = 0;
-  } else if (color_rate >= 1.0f) {
-    color_up_down = 1;
-  }
-
-  if (color_up_down) {
-    color_rate -= 0.02f * deltaTime;
-  } else {
-    color_rate += 0.02f * deltaTime;
-  }*/
 
   // Update blocks
   for (const auto index : iter::range(m_numBlocks)) {
